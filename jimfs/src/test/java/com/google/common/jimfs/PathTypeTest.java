@@ -39,6 +39,19 @@ public class PathTypeTest {
   static final URI fileSystemUri = URI.create("jimfs://foo");
 
   @Test
+  public void testURIThrowsException() {
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      URI fileSystemUri = URI.create("incorrect URI");
+      URI fileUri = type.toUri(fileSystemUri, "$", ImmutableList.of("test1", "test2"), false);
+    });
+
+    String expectedMessage = "Illegal character in path at index";
+    String actualMessage = exception.getMessage();
+
+    assertTrue(actualMessage.contains(expectedMessage));
+  }
+
+  @Test
   public void testBasicProperties() {
     assertThat(type.getSeparator()).isEqualTo("/");
     assertThat(type.getOtherSeparators()).isEqualTo("\\");

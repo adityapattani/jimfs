@@ -170,6 +170,42 @@ public class ConfigurationTest {
   }
 
   @Test
+  public void testBuilderForNone() {
+    AttributeProvider unixProvider = StandardAttributeProviders.get("unix");
+
+    FileTimeSource fileTimeSource = new FakeFileTimeSource();
+    Configuration config =
+            Configuration.builder(PathType.unix())
+                    .setRoots("/")
+                    .setWorkingDirectory("/hello/world")
+                    .setNameCanonicalNormalization(NONE)
+                    .setNameDisplayNormalization(NONE)
+                    .setPathEqualityUsesCanonicalForm(true)
+                    .setBlockSize(10)
+                    .setMaxSize(100)
+                    .setMaxCacheSize(50)
+                    .setAttributeViews("basic", "posix")
+                    .addAttributeProvider(unixProvider)
+                    .setDefaultAttributeValue(
+                            "posix:permissions", PosixFilePermissions.fromString("---------"))
+                    .setFileTimeSource(fileTimeSource)
+                    .build();
+
+    assertThat(config.pathType).isEqualTo(PathType.unix());
+    assertThat(config.roots).containsExactly("/");
+    assertThat(config.workingDirectory).isEqualTo("/hello/world");
+    assertThat(config.pathEqualityUsesCanonicalForm).isTrue();
+    assertThat(config.blockSize).isEqualTo(10);
+    assertThat(config.maxSize).isEqualTo(100);
+    assertThat(config.maxCacheSize).isEqualTo(50);
+    assertThat(config.attributeViews).containsExactly("basic", "posix");
+    assertThat(config.attributeProviders).containsExactly(unixProvider);
+    assertThat(config.defaultAttributeValues)
+            .containsEntry("posix:permissions", PosixFilePermissions.fromString("---------"));
+    assertThat(config.fileTimeSource).isEqualTo(fileTimeSource);
+  }
+
+  @Test
   public void testBuilder() {
     AttributeProvider unixProvider = StandardAttributeProviders.get("unix");
 
